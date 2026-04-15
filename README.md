@@ -4,16 +4,15 @@ ERNIE-Image text-to-image generation on Apple Silicon.
 
 Uses MLX for the 8B diffusion transformer and VAE (where all the compute is), PyTorch for the 3.8B text encoder (runs once in 0.1s).
 
+Pre-converted MLX weights: [treadon/ERNIE-Image-Turbo-MLX](https://huggingface.co/treadon/ERNIE-Image-Turbo-MLX)
+
 ## Quick Start
 
 ```bash
 # Install
 pip install -e .
 
-# One-time weight conversion
-python generate.py --convert-weights
-
-# Generate
+# Generate (weights download automatically from HuggingFace)
 python generate.py -p "A vibrant manga comic about a cat and a dragon"
 
 # Interactive mode
@@ -23,14 +22,36 @@ python generate.py --interactive
 python generate.py -p "A movie poster" --seed 42 -o poster.png
 ```
 
+## Python API
+
+```python
+from ernie_image import ErnieImagePipeline, TextEncoder
+
+te = TextEncoder.from_pretrained()
+pipe = ErnieImagePipeline.from_pretrained("treadon/ERNIE-Image-Turbo-MLX")
+
+emb = te.encode("A cat discovering a tiny dragon in its food bowl")
+img = pipe.generate(text_embeddings=emb)
+img.save("output.png")
+```
+
 ## Requirements
 
 - Apple Silicon Mac (M1/M2/M3/M4)
 - Python 3.10+
 - ~30GB RAM (model loads in BF16)
-- ~16GB disk for pre-converted weights
+- ~16GB disk (weights cached after first download)
 
 ## Benchmarks (1024x1024, 8 steps, M4 Pro 64GB)
+
+### MLX vs PyTorch/MPS
+
+| Pipeline | Total | Per Step |
+|----------|-------|----------|
+| PyTorch/MPS (diffusers) | 137.0s | 17.1s/step |
+| **MLX (this repo)** | **134.2s** | **16.0s/step** |
+
+### Breakdown
 
 | Component | Framework | Time |
 |-----------|-----------|------|
@@ -58,8 +79,8 @@ ernie_image/
 ├── scheduler.py        # Flow Matching Euler Scheduler
 ├── text_encoder.py     # Mistral-3 text encoding (PyTorch hybrid)
 ├── pipeline.py         # Ties everything together
-├── weights.py          # HuggingFace weight loading
-└── convert_weights.py  # One-time weight pre-conversion
+├── weights.py          # Weight loading utilities
+└── convert_weights.py  # Weight conversion (for developers)
 ```
 
 ## Base Model
