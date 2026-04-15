@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "mlx-ernie-image"
+version = "0.1.0"
+description = "ERNIE-Image text-to-image generation on Apple Silicon via MLX"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+dependencies = [
+    "mlx>=0.20.0",
+    "mlx-lm>=0.20.0",
+    "numpy",
+    "Pillow",
+    "huggingface-hub",
+    "safetensors",
+]
+
+[project.scripts]
+ernie-image = "generate:main"
